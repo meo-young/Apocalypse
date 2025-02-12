@@ -10,6 +10,8 @@ AMeleeEnemy::AMeleeEnemy()
 void AMeleeEnemy::Attack()
 {
 	if (bIsAttacking) return;
+
+	if (bIsDead) return;
 	
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *Target->GetName());
 	Target->GetDamage(AttackPower);

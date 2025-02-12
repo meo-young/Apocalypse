@@ -20,7 +20,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
 	bool bCanAttack;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
+	bool bIsDead;
 	bool bIsAttacking;
+
 
 protected:
 	// 최대체력

@@ -11,6 +11,7 @@
 #include "InputActionValue.h"
 #include "MovieSceneTracksComponentTypes.h"
 #include "Engine/LocalPlayer.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -95,6 +96,7 @@ void AApocalypseCharacter::GetDamage(int Damage)
 void AApocalypseCharacter::OnDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Game Over"));
+	UGameplayStatics::OpenLevel(GetWorld(), "Gameover");
 }
 
 int AApocalypseCharacter::GetPower() const

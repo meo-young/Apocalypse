@@ -51,18 +51,20 @@ void AEnemySpawner::SpawnEnemy()
 	AMainGameStateBase* GameStateBase = GetWorld()->GetGameState<AMainGameStateBase>();
 	int CurrentLevel = GameStateBase->GetCurrentLevel();
 
+	FVector SpawnLocation = GetSpawnerLocations();
+
 	if (CurrentLevel >= 3)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Spawner Destroyed !"));
+		SpawnLocation.X += 500.0f;
+		SpawnLocation.Y += 500.0f;
+		SpawnLocation.Z += 2000.0f;
+		Cast<AEnemy>(World->SpawnActor<AActor>(Enemies[2], SpawnLocation, FRotator(0, 0, 0)));
 		Destroy();
 		return;
 	}
-	// 액터 스폰 파라미터 설정
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this;
-	SpawnParams.Instigator = GetInstigator();
 
-	AEnemy* Enemy = Cast<AEnemy>(World->SpawnActor<AActor>(Enemies[CurrentLevel-1], GetSpawnerLocations(), FRotator(0, 0, 0), SpawnParams));
+
+	AEnemy* Enemy = Cast<AEnemy>(World->SpawnActor<AActor>(Enemies[CurrentLevel-1], SpawnLocation, FRotator(0, 0, 0)));
 }
 
 

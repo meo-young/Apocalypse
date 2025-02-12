@@ -19,6 +19,7 @@ void AEnemy::BeginPlay()
 	Target = Cast<AApocalypseCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), AApocalypseCharacter::StaticClass()));
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *Target->GetName());
 	CurrentHealth = MaxHealth;
+	UpdateOverheadHP();
 }
 
 void AEnemy::DetectTarget()
@@ -33,6 +34,8 @@ void AEnemy::DetectTarget()
 void AEnemy::FollowTarget(const float DeltaTime)
 {
 	if (!Target) return;
+
+	if (bIsDead) return;
 
 	// 플레이어와 적 사이의 방향벡터 계산
 	FVector ActorLocation = GetActorLocation();
@@ -71,15 +74,21 @@ void AEnemy::FinishAttack()
 
 void AEnemy::OnDeath()
 {
+	if (bIsDead) return;
 	// 사망했을 때의 로직 처리
 	UE_LOG(LogTemp, Warning, TEXT("%s Destroyed !"), *this->GetName());
 	AMainGameStateBase* GameStateBase = GetWorld()->GetGameState<AMainGameStateBase>();
 	GameStateBase->AddScore(MaxHealth);
-	Destroy();
+	bIsDead = true;
 }
 
 void AEnemy::UpdateOverheadHP()
 {
+	if (bIsDead)
+	{
+		OverHeadWidget->RemoveFromRoot();
+		return;
+	}
 	UUserWidget* OverHeadWidgetInstance = OverHeadWidget->GetUserWidgetObject();
 	UTextBlock* HPText = Cast<UTextBlock>(OverHeadWidgetInstance->GetWidgetFromName("OverHeadHp"));
 	HPText->SetText(FText::FromString(FString::Printf(TEXT("%d / %d"), CurrentHealth, MaxHealth)));
@@ -87,8 +96,12 @@ void AEnemy::UpdateOverheadHP()
 
 void AEnemy::SpawnItem()
 {
+	if (bIsDead) return;
+	
 	int RandomNum = FMath::RandRange(0, DropItems.Num() - 1);
-	GetWorld()->SpawnActor<ABaseItem>(DropItems[RandomNum], GetActorLocation(), GetActorRotation());
+	FVector SpawnLocation = GetActorLocation();
+	SpawnLocation.Z = -47500.0f;
+	GetWorld()->SpawnActor<ABaseItem>(DropItems[RandomNum], SpawnLocation, GetActorRotation());
 }
 
 
