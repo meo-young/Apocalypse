@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "MovieSceneTracksComponentTypes.h"
 #include "Engine/LocalPlayer.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -16,7 +17,7 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 //////////////////////////////////////////////////////////////////////////
 // AApocalypseCharacter
 
-AApocalypseCharacter::AApocalypseCharacter()
+AApocalypseCharacter::AApocalypseCharacter() : AttackPower(10), MaxHealth(100)
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -35,9 +36,16 @@ AApocalypseCharacter::AApocalypseCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	// 체력 초기화
+	CurrentHealth = MaxHealth;
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
+
+void AApocalypseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}
 
 void AApocalypseCharacter::NotifyControllerChanged()
 {
@@ -72,6 +80,26 @@ void AApocalypseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input Component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void AApocalypseCharacter::GetDamage(int Damage)
+{
+	CurrentHealth -= Damage;
+	if (CurrentHealth <= 0)
+	{
+		CurrentHealth = 0;
+		OnDeath();
+	}
+}
+
+void AApocalypseCharacter::OnDeath()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Game Over"));
+}
+
+int AApocalypseCharacter::GetPower() const
+{
+	return AttackPower;
 }
 
 

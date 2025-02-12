@@ -1,5 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -55,8 +53,17 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
+	int MaxHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
+	int AttackPower;
+	
+	int CurrentHealth;
+
 protected:
 	// APawn interface
+	virtual void BeginPlay() override;
 	virtual void NotifyControllerChanged() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 	// End of APawn interface
@@ -66,6 +73,14 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
+	UFUNCTION(BlueprintCallable, Category="Player")
+	void GetDamage(int Damage);
+	void OnDeath();
+	int GetPower() const;
+	int GetHP() const { return CurrentHealth; };
+	void AddHP(int amount) { CurrentHealth += amount; };
+	void AddAtk(int amount) { AttackPower += amount; };
 
 };
 

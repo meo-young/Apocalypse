@@ -9,7 +9,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "MainPlayerController.h"
 #include "Animation/AnimInstance.h"
+#include "Blueprint/UserWidget.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 
@@ -23,30 +25,12 @@ UApocalypseWeaponComponent::UApocalypseWeaponComponent()
 
 void UApocalypseWeaponComponent::Fire()
 {
-	if (Character == nullptr || Character->GetController() == nullptr)
-	{
-		return;
-	}
+	if (Character == nullptr || Character->GetController() == nullptr) return;
 
-	// Try and fire a projectile
-	if (ProjectileClass != nullptr)
-	{
-		UWorld* const World = GetWorld();
-		if (World != nullptr)
-		{
-			APlayerController* PlayerController = Cast<APlayerController>(Character->GetController());
-			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
-			// MuzzleOffset is in camera space, so transform it to world space before offsetting from the character location to find the final muzzle position
-			const FVector SpawnLocation = GetOwner()->GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+	UE_LOG(LogTemp, Warning, TEXT("Fire"));
 	
-			//Set Spawn Collision Handling Override
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
-	
-			// Spawn the projectile at the muzzle
-			World->SpawnActor<AApocalypseProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
-		}
-	}
+	AMainPlayerController* PlayerController = Cast<AMainPlayerController>(GetWorld()->GetFirstPlayerController());
+	PlayerController->AssaultRifleFire();
 	
 	// Try and play the sound if specified
 	if (FireSound != nullptr)
@@ -76,12 +60,15 @@ bool UApocalypseWeaponComponent::AttachWeapon(AApocalypseCharacter* TargetCharac
 		return false;
 	}
 
+	this->SetRelativeLocation(FVector(0.0f,15.0f,15.0f));
+	this->SetRelativeRotation(FRotator(0.0f,90.0f,0.0f));
+
 	// Attach the weapon to the First Person Character
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, true);
 	AttachToComponent(Character->GetMesh1P(), AttachmentRules, FName(TEXT("GripPoint")));
 
 	// Set up action bindings
-	if (APlayerController* PlayerController = Cast<APlayerController>(Character->GetController()))
+	if (AMainPlayerController* PlayerController = Cast<AMainPlayerController>(Character->GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
@@ -92,9 +79,11 @@ bool UApocalypseWeaponComponent::AttachWeapon(AApocalypseCharacter* TargetCharac
 		if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerController->InputComponent))
 		{
 			// Fire
-			EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UApocalypseWeaponComponent::Fire);
+			if (!EnhancedInputComponent->HasBindings())
+				EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &UApocalypseWeaponComponent::Fire);
 		}
 	}
+	
 
 	return true;
 }

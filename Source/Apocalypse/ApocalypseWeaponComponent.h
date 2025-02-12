@@ -38,6 +38,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	class UInputAction* FireAction;
 
+	// 재장전 시간
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Fire")
+	float ReloadingTime;
+	
+	// 최대 탄약 개수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Fire")
+	int AmmoMaxCount;
+	
+	// 현재 탄약 개수
+	int AmmoRemainCount;
+
 	/** Sets default values for this component's properties */
 	UApocalypseWeaponComponent();
 
